@@ -141,7 +141,13 @@ export const useStore = create<State>()(
   ),
 );
 
-export const hasServer = (s: Settings) => s.apiBaseUrl.trim().length > 0;
+/**
+ * SpendWise Pro = AI suggestions + automatic price checks. Both cost money per use, so they need
+ * the hosted server AND a paid unlock. Free users get everything else, fully on-device.
+ * Development builds skip the payment check so the paid features can be tested.
+ */
+export const proActive = (s: Settings) =>
+  s.apiBaseUrl.trim().length > 0 && (s.proUnlocked === true || __DEV__);
 
 /** Wait until persisted state has loaded (needed in the background task). */
 export function whenHydrated(): Promise<void> {

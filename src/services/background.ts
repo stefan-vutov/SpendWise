@@ -1,7 +1,7 @@
 import * as BackgroundTask from 'expo-background-task';
 import * as TaskManager from 'expo-task-manager';
 import * as Notifications from 'expo-notifications';
-import { hasServer, useStore, whenHydrated } from '../store';
+import { proActive, useStore, whenHydrated } from '../store';
 import { scanPrices } from './api';
 import { isScanDue, staleItems } from '../domain/logic';
 import { CATEGORY_LABELS, Item } from '../domain/types';
@@ -20,7 +20,7 @@ export async function runChecks(opts: { force?: boolean } = {}): Promise<{ scann
   let scanned = 0;
 
   const active = items.filter((i) => !i.purchasedAt);
-  if (active.length && hasServer(settings) && (opts.force || isScanDue(settings.scanFrequency, settings.lastScanAt))) {
+  if (active.length && proActive(settings) && (opts.force || isScanDue(settings.scanFrequency, settings.lastScanAt))) {
     const results = await scanPrices(settings, active);
     // Only compare like with like — ignore offers in a different currency.
     const sameCurrency = results.map((r) => ({

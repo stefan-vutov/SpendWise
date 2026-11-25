@@ -3,7 +3,7 @@ import { ActivityIndicator, Alert, AppState, Pressable, ScrollView, StyleSheet, 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CATEGORIES, CATEGORY_LABELS, Item } from '../domain/types';
 import { computeTotals, daysOnList, isStale, staleItems } from '../domain/logic';
-import { hasServer, useStore } from '../store';
+import { proActive, useStore } from '../store';
 import { runChecks } from '../services/background';
 import { Button, Card, categoryColors, colors, money } from '../components/ui';
 import { AddItemModal } from './AddItemModal';
@@ -47,7 +47,7 @@ export function HomeScreen() {
         'Scan complete',
         r.deals.length ? `Found ${r.deals.length} new deal(s) on your list.` : `Checked ${r.scanned} item(s). No new price drops.`,
       );
-    } catch (e) {
+    } catch {
       Alert.alert('Scan failed', `Couldn't reach the price service (${settings.apiBaseUrl}). Check Settings → Server.`);
     } finally {
       setScanning(false);
@@ -105,8 +105,8 @@ export function HomeScreen() {
           <Card>
             <Text style={st.emptyTitle}>Your plan is empty</Text>
             <Text style={st.muted}>
-              Add things you're thinking of buying. We'll help you sort needs from wants, watch for sales, and nudge you
-              when a "need" turns out not to be one.
+              Add things you’re thinking of buying. We’ll help you sort needs from wants, watch for sales, and nudge you
+              when a “need” turns out not to be one.
             </Text>
           </Card>
         )}
@@ -128,7 +128,7 @@ export function HomeScreen() {
           );
         })}
 
-        {active.length > 0 && hasServer(settings) && (
+        {active.length > 0 && proActive(settings) && (
           <Button
             title={scanning ? 'Checking stores…' : 'Check prices now'}
             kind="secondary"
@@ -137,7 +137,7 @@ export function HomeScreen() {
           />
         )}
         {scanning && <ActivityIndicator />}
-        {active.length > 0 && !hasServer(settings) && (
+        {active.length > 0 && !proActive(settings) && (
           <Text style={[st.muted, { textAlign: 'center' }]}>
             Tip: tap an item, then “Search stores” to compare prices for free.
           </Text>
@@ -158,7 +158,7 @@ export function HomeScreen() {
         <Text style={st.fabText}>＋ Add item</Text>
       </Pressable>
 
-      <AddItemModal visible={adding} onClose={() => setAdding(false)} />
+      {adding && <AddItemModal visible onClose={() => setAdding(false)} />}
       <SettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <DowngradeReviewModal visible={reviewing && !adding && !settingsOpen} onClose={() => setReviewing(false)} />
       <ItemActionsModal item={selected} onClose={() => setSelectedId(null)} />

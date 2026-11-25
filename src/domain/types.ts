@@ -97,4 +97,6 @@ export interface Settings {
   apiBaseUrl: string;
   lastScanAt?: string;
   lastStaleNotifyAt?: string;
+  /** Set by the in-app purchase flow once SpendWise Pro is sold (not yet). */
+  proUnlocked?: boolean;
 }

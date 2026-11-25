@@ -1,12 +1,13 @@
 import { Assessment, Category, Item, Offer, Settings, Verdict } from '../domain/types';
 import { localAssess } from '../domain/assessment';
+import { proActive } from '../store';
 
 export interface AiAssessment extends Assessment {
   reasonablePerson?: { verdict: Verdict; challenge: string };
 }
 
 async function post<T>(settings: Settings, path: string, body: unknown, timeoutMs: number): Promise<T> {
-  if (!settings.apiBaseUrl.trim()) throw new Error('No server configured (free mode)');
+  if (!proActive(settings)) throw new Error('SpendWise Pro not active (free mode)');
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {

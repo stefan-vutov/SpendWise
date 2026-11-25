@@ -26,8 +26,8 @@ export function DowngradeReviewModal({ visible, onClose }: { visible: boolean; o
             <Text style={st.kicker}>{queue.length} to review</Text>
             <Text style={st.title}>Do you still need “{item.name}”?</Text>
             <Text style={st.body}>
-              It's been in <Text style={st.bold}>{CATEGORY_LABELS[item.category]}</Text> for {daysOnList(item)} days
-              (your limit is {STALE_THRESHOLD_LABELS[settings.staleThreshold]}). If it were truly essential, you'd
+              It’s been in <Text style={st.bold}>{CATEGORY_LABELS[item.category]}</Text> for {daysOnList(item)} days
+              (your limit is {STALE_THRESHOLD_LABELS[settings.staleThreshold]}). If it were truly essential, you’d
               probably have bought it by now.
             </Text>
             <Text style={st.price}>{money(item.price, settings.currency)}</Text>

@@ -14,6 +14,31 @@ they want to buy by real need, see what it all adds up to, and curb spontaneous 
 | Daily / weekly / off sale scanning of major stores in your country (+ optional international online retailers), with notifications | `server/src/prices.ts`, `src/services/background.ts` |
 | Downgrade prompt when a Need/Must item has waited longer than 1 week, 2 weeks or 1–6 months (you choose) | `isStale` in `src/domain/logic.ts`, `src/screens/DowngradeReviewModal.tsx` |
 
+## Free and Pro
+
+SpendWise ships as **one free app** with an optional paid upgrade, **SpendWise Pro**, added later.
+
+| Free (on the phone, costs nothing to run) | Pro (paid, needs the hosted server) |
+|---|---|
+| List, four categories, totals | Automatic daily/weekly price checks at major stores |
+| On-device category suggestions | Sale alerts (notifications) |
+| "Reasonable person" questions | AI category suggestions and a pointed "do you need it?" question |
+| Downgrade reminders | |
+| "Search stores for this" link per item | |
+
+How it's wired: `proActive(settings)` in `src/store.ts` turns Pro on only when the app has a server
+address **and** `settings.proUnlocked` is true. Development builds skip the payment part so Pro can be tested.
+Store builds currently ship with no server address, so they are the free version.
+
+### Steps to launch Pro later
+1. Host the `server/` folder online (e.g. Render, Railway, Fly.io) and put its address in `app.json` →
+   `expo.extra.apiBaseUrl`.
+2. Sell Pro as an in-app subscription. Apple and Google require their own payment systems for digital
+   features. RevenueCat (`react-native-purchases`) is the usual choice with Expo; it needs a development build.
+3. When a purchase succeeds, set `proUnlocked: true`.
+4. Make the server check the subscription on every request (e.g. RevenueCat's API), so only paying users use your AI credit.
+5. Price the subscription above your AI cost per user. Each price check is one AI web-search request.
+
 ## Layout
 
 ```

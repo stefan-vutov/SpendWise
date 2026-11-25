@@ -3,7 +3,7 @@ import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View
 import { CATEGORY_LABELS, Category, ReasonablePersonCheck, Verdict } from '../domain/types';
 import { REASONABLE_PERSON_QUESTIONS, VERDICT_COPY, buildCheck, categoryForVerdict } from '../domain/assessment';
 import { assessItem } from '../services/api';
-import { hasServer, useStore } from '../store';
+import { proActive, useStore } from '../store';
 import { Button, colors, money } from '../components/ui';
 
 const ORDER: Verdict[] = ['justified', 'borderline', 'not_justified'];
@@ -28,10 +28,10 @@ export function ReasonablePersonModal(props: {
   const settings = useStore((s) => s.settings);
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
   const [ai, setAi] = useState<{ verdict: Verdict; challenge: string } | null>(null);
-  const [aiLoading, setAiLoading] = useState(hasServer(settings));
+  const [aiLoading, setAiLoading] = useState(proActive(settings));
 
   useEffect(() => {
-    if (!hasServer(settings)) return;
+    if (!proActive(settings)) return;
     let live = true;
     assessItem(settings, { name: props.itemName, price: props.price, notes: props.notes, chosenCategory: props.chosen })
       .then((r) => live && setAi(r.reasonablePerson ?? null))

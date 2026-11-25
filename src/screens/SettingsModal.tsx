@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { STALE_THRESHOLDS, STALE_THRESHOLD_LABELS, ScanFrequency } from '../domain/types';
-import { useStore } from '../store';
+import { proActive, useStore } from '../store';
 import { colors, Segmented } from '../components/ui';
 
 const FREQS: readonly ScanFrequency[] = ['daily', 'weekly', 'off'];
@@ -37,13 +37,14 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
               onChangeText={(v) => update({ currency: v.toUpperCase() })}
             />
           </Row>
+        </Section>
+
+        {proActive(settings) ? (
+        <Section title="Sale scanning" hint="How often to check stores for price drops on your list.">
           <View style={st.switchRow}>
             <Text style={st.label}>Include international online retailers</Text>
             <Switch value={settings.includeInternational} onValueChange={(v) => update({ includeInternational: v })} />
           </View>
-        </Section>
-
-        <Section title="Sale scanning" hint="How often to check stores for price drops on your list. Needs the smart features below.">
           <Segmented
             options={FREQS}
             value={settings.scanFrequency}
@@ -54,6 +55,15 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
             <Text style={st.hint}>Last scan: {new Date(settings.lastScanAt).toLocaleString()}</Text>
           )}
         </Section>
+        ) : (
+          <View style={st.pro}>
+            <Text style={st.proTitle}>SpendWise Pro · coming soon</Text>
+            <Text style={st.hint}>
+              Automatic price checks at major stores in your country, with an alert when something on your list goes on
+              sale, plus AI category suggestions. Until then, tap any item and use “Search stores for this”.
+            </Text>
+          </View>
+        )}
 
         <Section
           title="Ask to downgrade after"
@@ -67,7 +77,8 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
           />
         </Section>
 
-        <Section title="Smart features (optional)" hint="Leave empty to use SpendWise for free. Enter your SpendWise server address to add AI suggestions and automatic sale scanning.">
+        {__DEV__ && (
+        <Section title="Developer: server address" hint="Only shown in development builds. Enter a SpendWise server address to test Pro features.">
           <TextInput
             style={st.input}
             value={settings.apiBaseUrl}
@@ -78,6 +89,7 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
             onChangeText={(v) => update({ apiBaseUrl: v.trim() })}
           />
         </Section>
+        )}
       </ScrollView>
     </Modal>
   );
@@ -110,5 +122,7 @@ const st = StyleSheet.create({
   label: { fontSize: 14, color: colors.text, flexShrink: 1 },
   hint: { fontSize: 13, color: colors.muted },
   input: { backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border, borderRadius: 10, padding: 12, fontSize: 16 },
+  pro: { backgroundColor: '#F5F3FF', borderRadius: 12, padding: 14, gap: 6 },
+  proTitle: { fontSize: 16, fontWeight: '800', color: '#5B21B6' },
   switchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
 });

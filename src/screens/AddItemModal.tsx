@@ -6,7 +6,7 @@ import { CATEGORIES, CATEGORY_HINTS, CATEGORY_LABELS, Category, ReasonablePerson
 import { isProtected } from '../domain/logic';
 import { localAssess } from '../domain/assessment';
 import { AiAssessment, assessItem } from '../services/api';
-import { useStore } from '../store';
+import { proActive, useStore } from '../store';
 import { Button, categoryColors, colors } from '../components/ui';
 import { ReasonablePersonModal } from './ReasonablePersonModal';
 
@@ -17,7 +17,8 @@ export function AddItemModal({ visible, onClose }: { visible: boolean; onClose: 
   const [price, setPrice] = useState('');
   const [notes, setNotes] = useState('');
   const [category, setCategory] = useState<Category | null>(null);
-  const [assessment, setAssessment] = useState<AiAssessment | null>(null);
+  // Latest server answer, tagged with the input it was for so stale answers are ignored.
+  const [aiResult, setAiResult] = useState<{ key: string; value: AiAssessment } | null>(null);
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(false);
   const reqId = useRef(0);
@@ -25,25 +26,25 @@ export function AddItemModal({ visible, onClose }: { visible: boolean; onClose: 
   const priceNum = parseFloat(price.replace(',', '.'));
   const valid = name.trim().length > 1 && Number.isFinite(priceNum) && priceNum > 0;
 
-  useEffect(() => {
-    if (!visible) {
-      setName(''); setPrice(''); setNotes(''); setCategory(null); setAssessment(null); setChecking(false);
-    }
-  }, [visible]);
+  // Instant on-device guess; a smarter (Pro) answer replaces it when it arrives.
+  const inputKey = `${name}|${price}|${notes}`;
+  const assessment: AiAssessment | null = !valid
+    ? null
+    : aiResult?.key === inputKey
+      ? aiResult.value
+      : localAssess(name, priceNum);
 
-  // Debounced smart suggestion: instant local guess, then the AI answer replaces it.
   useEffect(() => {
-    if (!valid) { setAssessment(null); return; }
-    setAssessment(localAssess(name, priceNum));
+    if (!valid || !proActive(settings)) return;
     const id = ++reqId.current;
     const t = setTimeout(async () => {
       setLoading(true);
       const r = await assessItem(settings, { name, price: priceNum, notes });
-      if (id === reqId.current) { setAssessment(r); setLoading(false); }
+      if (id === reqId.current) { setAiResult({ key: inputKey, value: r }); setLoading(false); }
     }, 800);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, price, notes]);
+  }, [inputKey]);
 
   const chosen = category ?? assessment?.suggestedCategory ?? null;
 
@@ -72,7 +73,7 @@ export function AddItemModal({ visible, onClose }: { visible: boolean; onClose: 
             <TextInput style={st.input} value={name} onChangeText={setName} placeholder="e.g. Winter boots" autoFocus />
           </View>
           <View>
-            <Text style={st.label}>Price you'd pay / found in store ({settings.currency})</Text>
+            <Text style={st.label}>Price you’d pay / found in store ({settings.currency})</Text>
             <TextInput style={st.input} value={price} onChangeText={setPrice} keyboardType="decimal-pad" placeholder="0.00" />
           </View>
           <View>
@@ -89,7 +90,7 @@ export function AddItemModal({ visible, onClose }: { visible: boolean; onClose: 
                 {loading && <ActivityIndicator size="small" />}
               </View>
               <Text style={st.muted}>{assessment.reasoning}</Text>
-              <Text style={st.tiny}>{assessment.source === 'ai' ? 'Smart assessment' : 'Quick on-device guess'}</Text>
+              <Text style={st.tiny}>{assessment.source === 'ai' ? 'Smart assessment' : 'On-device suggestion'}</Text>
             </View>
           )}
 
