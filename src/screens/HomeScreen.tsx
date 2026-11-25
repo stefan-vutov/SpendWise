@@ -3,7 +3,7 @@ import { ActivityIndicator, Alert, AppState, Pressable, ScrollView, StyleSheet, 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CATEGORIES, CATEGORY_LABELS, Item } from '../domain/types';
 import { computeTotals, daysOnList, isStale, staleItems } from '../domain/logic';
-import { useStore } from '../store';
+import { hasServer, useStore } from '../store';
 import { runChecks } from '../services/background';
 import { Button, Card, categoryColors, colors, money } from '../components/ui';
 import { AddItemModal } from './AddItemModal';
@@ -128,7 +128,7 @@ export function HomeScreen() {
           );
         })}
 
-        {active.length > 0 && (
+        {active.length > 0 && hasServer(settings) && (
           <Button
             title={scanning ? 'Checking stores…' : 'Check prices now'}
             kind="secondary"
@@ -137,6 +137,11 @@ export function HomeScreen() {
           />
         )}
         {scanning && <ActivityIndicator />}
+        {active.length > 0 && !hasServer(settings) && (
+          <Text style={[st.muted, { textAlign: 'center' }]}>
+            Tip: tap an item, then “Search stores” to compare prices for free.
+          </Text>
+        )}
 
         {purchased.length > 0 && (
           <Pressable onPress={() => setShowPurchased((v) => !v)}>

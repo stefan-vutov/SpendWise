@@ -36,7 +36,8 @@ const defaultSettings: Settings = {
   scanFrequency: 'weekly',
   includeInternational: true,
   staleThreshold: '1m',
-  apiBaseUrl: (Constants.expoConfig?.extra?.apiBaseUrl as string | undefined) ?? 'http://localhost:8787',
+  // Empty = free mode: everything runs on the phone, no AI or automatic price scanning.
+  apiBaseUrl: (Constants.expoConfig?.extra?.apiBaseUrl as string | undefined) ?? '',
 };
 
 const uid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
@@ -127,10 +128,20 @@ export const useStore = create<State>()(
     {
       name: 'spendwise-v1',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 1,
+      version: 2,
+      migrate: (persisted, version) => {
+        const state = persisted as Pick<State, 'items' | 'settings'>;
+        // v1 defaulted to a localhost server that phones can't reach; switch those to free mode.
+        if (version < 2 && state?.settings?.apiBaseUrl === 'http://localhost:8787') {
+          state.settings.apiBaseUrl = '';
+        }
+        return state as State;
+      },
     },
   ),
 );
+
+export const hasServer = (s: Settings) => s.apiBaseUrl.trim().length > 0;
 
 /** Wait until persisted state has loaded (needed in the background task). */
 export function whenHydrated(): Promise<void> {

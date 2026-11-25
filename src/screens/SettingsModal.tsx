@@ -43,7 +43,7 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
           </View>
         </Section>
 
-        <Section title="Sale scanning" hint="How often to check stores for price drops on your list.">
+        <Section title="Sale scanning" hint="How often to check stores for price drops on your list. Needs the smart features below.">
           <Segmented
             options={FREQS}
             value={settings.scanFrequency}
@@ -67,13 +67,14 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
           />
         </Section>
 
-        <Section title="Server" hint="Address of your SpendWise server for smart assessment and price scanning.">
+        <Section title="Smart features (optional)" hint="Leave empty to use SpendWise for free. Enter your SpendWise server address to add AI suggestions and automatic sale scanning.">
           <TextInput
             style={st.input}
             value={settings.apiBaseUrl}
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="url"
+            placeholder="Empty = free mode"
             onChangeText={(v) => update({ apiBaseUrl: v.trim() })}
           />
         </Section>

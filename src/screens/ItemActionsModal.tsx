@@ -6,6 +6,7 @@ import { VERDICT_COPY } from '../domain/assessment';
 import { useStore } from '../store';
 import { Button, categoryColors, colors, money } from '../components/ui';
 import { ReasonablePersonModal } from './ReasonablePersonModal';
+import { shoppingSearchUrl } from '../services/storeSearch';
 
 export function ItemActionsModal({ item, onClose }: { item: Item | null; onClose: () => void }) {
   const settings = useStore((s) => s.settings);
@@ -67,6 +68,9 @@ export function ItemActionsModal({ item, onClose }: { item: Item | null; onClose
             ))}
           </View>
 
+          {!item.purchasedAt && (
+            <Button title="Search stores for this" kind="secondary" onPress={() => Linking.openURL(shoppingSearchUrl(item.name))} />
+          )}
           <Button title="Mark as purchased" onPress={() => { markPurchased(item.id); onClose(); }} />
           <Button
             title="Remove from list"

@@ -6,6 +6,7 @@ export interface AiAssessment extends Assessment {
 }
 
 async function post<T>(settings: Settings, path: string, body: unknown, timeoutMs: number): Promise<T> {
+  if (!settings.apiBaseUrl.trim()) throw new Error('No server configured (free mode)');
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
