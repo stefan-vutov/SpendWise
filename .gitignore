@@ -42,3 +42,4 @@ yarn-error.*
 server/node_modules/
 .env
 spendwise.zip
+server/data/

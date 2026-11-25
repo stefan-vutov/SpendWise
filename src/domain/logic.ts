@@ -114,3 +114,10 @@ export function bestDeal(item: Item, offers: Offer[]): Offer | null {
     .sort((a, b) => a.price - b.price);
   return cheaper[0] ?? null;
 }
+
+/** Rough price checks a month for a list of this size at this frequency (one item = one check). */
+export function estimatedMonthlyChecks(itemCount: number, f: ScanFrequency): number {
+  if (f === 'daily') return itemCount * 30;
+  if (f === 'weekly') return Math.ceil(itemCount * 4.35);
+  return 0;
+}

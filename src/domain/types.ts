@@ -87,6 +87,14 @@ export interface Item {
   purchasedAt?: string;
 }
 
+export interface UsageSummary {
+  month: string;
+  priceChecksUsed: number;
+  priceChecksLimit: number;
+  priceChecksLeft: number;
+  resetsAt: string;
+}
+
 export interface Settings {
   country: string; // ISO 3166-1 alpha-2, e.g. "US", "AU", "BG"
   currency: string; // ISO 4217, e.g. "USD"
@@ -99,4 +107,12 @@ export interface Settings {
   lastStaleNotifyAt?: string;
   /** Set by the in-app purchase flow once SpendWise Pro is sold (not yet). */
   proUnlocked?: boolean;
+  /** Store page where the person can cancel or change their subscription. */
+  manageSubscriptionUrl?: string;
+  /** Random id for this install, used when subscriptions aren't configured (development). */
+  installId?: string;
+  /** Latest Pro allowance figures from the server. */
+  usage?: UsageSummary;
+  /** Month ("2026-11") we last told the person their allowance ran out. */
+  limitNotifiedMonth?: string;
 }

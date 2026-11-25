@@ -10,6 +10,8 @@ import { AddItemModal } from './AddItemModal';
 import { SettingsModal } from './SettingsModal';
 import { DowngradeReviewModal } from './DowngradeReviewModal';
 import { ItemActionsModal } from './ItemActionsModal';
+import { PaywallModal } from './PaywallModal';
+import { proForSale } from '../services/purchases';
 
 export function HomeScreen() {
   const items = useStore((s) => s.items);
@@ -20,6 +22,7 @@ export function HomeScreen() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
   const [showPurchased, setShowPurchased] = useState(false);
+  const [paywall, setPaywall] = useState(false);
 
   const active = items.filter((i) => !i.purchasedAt);
   const purchased = items.filter((i) => i.purchasedAt);
@@ -43,12 +46,17 @@ export function HomeScreen() {
     setScanning(true);
     try {
       const r = await runChecks({ force: true });
+      const left = useStore.getState().settings.usage;
       Alert.alert(
         'Scan complete',
-        r.deals.length ? `Found ${r.deals.length} new deal(s) on your list.` : `Checked ${r.scanned} item(s). No new price drops.`,
+        [
+          r.deals.length ? `Found ${r.deals.length} new deal(s) on your list.` : `Checked ${r.scanned} item(s). No new price drops.`,
+          r.skippedForLimit ? `${r.skippedForLimit} item(s) skipped: this month’s price checks are used up.` : '',
+          left ? `${left.priceChecksLeft} of ${left.priceChecksLimit} checks left this month.` : '',
+        ].filter(Boolean).join('\n\n'),
       );
     } catch {
-      Alert.alert('Scan failed', `Couldn't reach the price service (${settings.apiBaseUrl}). Check Settings → Server.`);
+      Alert.alert('Scan failed', 'Couldn’t reach the price service. Please check your connection and try again.');
     } finally {
       setScanning(false);
     }
@@ -142,6 +150,11 @@ export function HomeScreen() {
             Tip: tap an item, then “Search stores” to compare prices for free.
           </Text>
         )}
+        {active.length > 0 && !proActive(settings) && proForSale() && (
+          <Pressable onPress={() => setPaywall(true)}>
+            <Text style={st.link}>Get automatic sale alerts with Pro →</Text>
+          </Pressable>
+        )}
 
         {purchased.length > 0 && (
           <Pressable onPress={() => setShowPurchased((v) => !v)}>
@@ -162,6 +175,7 @@ export function HomeScreen() {
       <SettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <DowngradeReviewModal visible={reviewing && !adding && !settingsOpen} onClose={() => setReviewing(false)} />
       <ItemActionsModal item={selected} onClose={() => setSelectedId(null)} />
+      <PaywallModal visible={paywall} onClose={() => setPaywall(false)} />
     </SafeAreaView>
   );
 }

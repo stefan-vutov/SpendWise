@@ -1,14 +1,29 @@
-import React from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Linking, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { STALE_THRESHOLDS, STALE_THRESHOLD_LABELS, ScanFrequency } from '../domain/types';
 import { proActive, useStore } from '../store';
-import { colors, Segmented } from '../components/ui';
+import { Button, colors, Segmented } from '../components/ui';
+import { estimatedMonthlyChecks } from '../domain/logic';
+import { fetchUsage } from '../services/api';
+import { proForSale } from '../services/purchases';
+import { PaywallModal } from './PaywallModal';
 
 const FREQS: readonly ScanFrequency[] = ['daily', 'weekly', 'off'];
 
 export function SettingsModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const settings = useStore((s) => s.settings);
   const update = useStore((s) => s.updateSettings);
+  const activeCount = useStore((s) => s.items.filter((i) => !i.purchasedAt).length);
+  const [paywall, setPaywall] = useState(false);
+  const pro = proActive(settings);
+  const usage = settings.usage;
+  const limit = usage?.priceChecksLimit ?? 100;
+  const estimate = estimatedMonthlyChecks(activeCount, settings.scanFrequency);
+
+  // Refresh the allowance whenever Settings opens.
+  useEffect(() => {
+    if (visible && pro) fetchUsage(useStore.getState().settings).then((u) => u && update({ usage: u }));
+  }, [visible, pro, update]);
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -51,18 +66,41 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
             onChange={(v) => update({ scanFrequency: v })}
             labels={{ daily: 'Daily', weekly: 'Weekly', off: 'Off' }}
           />
+          {estimate > limit && (
+            <Text style={st.warn}>
+              {activeCount} items {settings.scanFrequency} ≈ {estimate} checks a month, more than your {limit}. The most
+              important items (Need to have first) are checked first; switch to weekly to cover them all.
+            </Text>
+          )}
           {settings.lastScanAt && (
             <Text style={st.hint}>Last scan: {new Date(settings.lastScanAt).toLocaleString()}</Text>
           )}
         </Section>
         ) : (
           <View style={st.pro}>
-            <Text style={st.proTitle}>SpendWise Pro · coming soon</Text>
+            <Text style={st.proTitle}>SpendWise Pro{proForSale() ? '' : ' · coming soon'}</Text>
             <Text style={st.hint}>
               Automatic price checks at major stores in your country, with an alert when something on your list goes on
-              sale, plus AI category suggestions. Until then, tap any item and use “Search stores for this”.
+              sale, plus AI category suggestions. Meanwhile, tap any item and use “Search stores for this”.
             </Text>
+            {proForSale() && <Button title="See Pro" onPress={() => setPaywall(true)} />}
           </View>
+        )}
+
+        {pro && (
+          <Section title="Your Pro plan">
+            {usage ? (
+              <Text style={st.label}>
+                {usage.priceChecksLeft} of {usage.priceChecksLimit} price checks left this month · renews{' '}
+                {new Date(usage.resetsAt).toLocaleDateString()}
+              </Text>
+            ) : (
+              <Text style={st.hint}>Your monthly allowance appears after the first price check.</Text>
+            )}
+            {settings.manageSubscriptionUrl && (
+              <Button title="Manage subscription" kind="secondary" onPress={() => Linking.openURL(settings.manageSubscriptionUrl!)} />
+            )}
+          </Section>
         )}
 
         <Section
@@ -91,6 +129,7 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
         </Section>
         )}
       </ScrollView>
+      <PaywallModal visible={paywall} onClose={() => setPaywall(false)} />
     </Modal>
   );
 }
@@ -124,5 +163,6 @@ const st = StyleSheet.create({
   input: { backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border, borderRadius: 10, padding: 12, fontSize: 16 },
   pro: { backgroundColor: '#F5F3FF', borderRadius: 12, padding: 14, gap: 6 },
   proTitle: { fontSize: 16, fontWeight: '800', color: '#5B21B6' },
+  warn: { fontSize: 13, color: colors.warn },
   switchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
 });

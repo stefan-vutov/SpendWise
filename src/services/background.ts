@@ -13,22 +13,35 @@ const DAY = 24 * 60 * 60 * 1000;
  * Runs a price scan if one is due (or when forced from the UI) and checks for items
  * that have sat in Need/Must too long. Safe to call from foreground or background.
  */
-export async function runChecks(opts: { force?: boolean } = {}): Promise<{ scanned: number; deals: Item[] }> {
+export async function runChecks(
+  opts: { force?: boolean } = {},
+): Promise<{ scanned: number; deals: Item[]; skippedForLimit: number }> {
   await whenHydrated();
   const { items, settings, applyScan, updateSettings } = useStore.getState();
   let deals: Item[] = [];
   let scanned = 0;
+  let skippedForLimit = 0;
 
   const active = items.filter((i) => !i.purchasedAt);
   if (active.length && proActive(settings) && (opts.force || isScanDue(settings.scanFrequency, settings.lastScanAt))) {
-    const results = await scanPrices(settings, active);
+    const { results, usage } = await scanPrices(settings, active);
+    updateSettings({ usage });
+    skippedForLimit = results.filter((r) => r.skipped === 'limit').length;
+    // Only items that were actually checked update their deal; skipped/failed ones keep the last result.
     // Only compare like with like — ignore offers in a different currency.
-    const sameCurrency = results.map((r) => ({
+    const sameCurrency = results.filter((r) => !r.skipped && !r.error).map((r) => ({
       id: r.id,
       offers: r.offers.filter((o) => o.currency.toUpperCase() === settings.currency.toUpperCase()),
     }));
     deals = applyScan(sameCurrency, new Date());
-    scanned = active.length;
+    scanned = results.length - skippedForLimit;
+    if (skippedForLimit > 0 && settings.limitNotifiedMonth !== usage.month) {
+      updateSettings({ limitNotifiedMonth: usage.month });
+      await notify(
+        'Monthly price checks used up',
+        `${skippedForLimit} item(s) weren't checked. Your ${usage.priceChecksLimit} checks renew on ${new Date(usage.resetsAt).toLocaleDateString()}.`,
+      );
+    }
     for (const d of deals.slice(0, 3)) {
       await notify(
         `Price drop: ${d.name}`,
@@ -52,7 +65,7 @@ export async function runChecks(opts: { force?: boolean } = {}): Promise<{ scann
     updateSettings({ lastStaleNotifyAt: new Date().toISOString() });
   }
 
-  return { scanned, deals };
+  return { scanned, deals, skippedForLimit };
 }
 
 function fmt(n: number, currency: string) {

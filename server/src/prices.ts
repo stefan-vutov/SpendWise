@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { client, MODEL, FALLBACK, assertNotRefused } from './claude.js';
+import { client, PRICE_MODEL, fallbackParams, webSearchTool, assertNotRefused } from './claude.js';
+import { costOfResponse } from './cost.js';
 
 export interface PriceItem {
   id: string;
@@ -28,6 +29,8 @@ export interface PriceResult {
   id: string;
   offers: Offer[];
   error?: string;
+  /** Measured cost of this check in USD. */
+  costUsd: number;
 }
 
 const REPORT_TOOL: Anthropic.Beta.BetaTool = {
@@ -69,15 +72,9 @@ Only report offers you actually saw in search results for the same product (same
 
 /** Search the web for one item's current prices. */
 export async function checkItem(req: PriceRequest, item: PriceItem): Promise<PriceResult> {
-  const tools: Anthropic.Beta.BetaToolUnion[] = [
-    {
-      type: 'web_search_20260209',
-      name: 'web_search',
-      max_uses: 5,
-      user_location: { type: 'approximate', country: req.country },
-    },
-    REPORT_TOOL,
-  ];
+  // 3 searches is plenty for one product and keeps each check cheap ($0.01 per search).
+  const tools: Anthropic.Beta.BetaToolUnion[] = [webSearchTool(PRICE_MODEL, req.country, 3), REPORT_TOOL];
+  let costUsd = 0;
   const messages: Anthropic.Beta.BetaMessageParam[] = [
     {
       role: 'user',
@@ -88,15 +85,16 @@ export async function checkItem(req: PriceRequest, item: PriceItem): Promise<Pri
   let nudged = false;
   for (let turn = 0; turn < 6; turn++) {
     const msg = await client.beta.messages.create({
-      model: MODEL,
+      model: PRICE_MODEL,
       max_tokens: 16000,
-      ...FALLBACK,
+      ...fallbackParams(PRICE_MODEL),
       system: systemPrompt(req),
-      output_config: { effort: 'medium' },
+      output_config: { effort: 'low' }, // reading prices off search results needs little reasoning
       tools,
       messages,
     });
-    assertNotRefused(msg);
+    costUsd += costOfResponse(PRICE_MODEL, msg.usage);
+    assertNotRefused(msg, costUsd);
 
     const report = msg.content.find((b) => b.type === 'tool_use' && b.name === 'report_prices');
     if (report && report.type === 'tool_use') {
@@ -104,7 +102,7 @@ export async function checkItem(req: PriceRequest, item: PriceItem): Promise<Pri
       const offers = (input.offers ?? []).filter(
         (o) => typeof o.price === 'number' && o.price > 0 && typeof o.store === 'string',
       );
-      return { id: item.id, offers };
+      return { id: item.id, offers, costUsd };
     }
 
     // Keep the full assistant turn (including thinking and search results) in history.
@@ -114,21 +112,5 @@ export async function checkItem(req: PriceRequest, item: PriceItem): Promise<Pri
     nudged = true;
     messages.push({ role: 'user', content: 'Please call report_prices now with what you found.' });
   }
-  return { id: item.id, offers: [], error: 'No price report produced' };
-}
-
-export async function checkPrices(req: PriceRequest, concurrency = 3): Promise<PriceResult[]> {
-  const results: PriceResult[] = [];
-  const queue = [...req.items];
-  async function worker() {
-    for (let item = queue.shift(); item; item = queue.shift()) {
-      try {
-        results.push(await checkItem(req, item));
-      } catch (err) {
-        results.push({ id: item.id, offers: [], error: err instanceof Error ? err.message : String(err) });
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, worker));
-  return results;
+  return { id: item.id, offers: [], error: 'No price report produced', costUsd };
 }

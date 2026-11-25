@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
-import { computeTotals, isStale, nextCategoryDown, isScanDue, bestDeal, moveToCategory } from './logic';
+import { computeTotals, isStale, nextCategoryDown, isScanDue, bestDeal, moveToCategory, estimatedMonthlyChecks } from './logic';
 import { evaluateCheck, localAssess, categoryForVerdict } from './assessment';
 import { Item } from './types';
 
@@ -64,6 +64,14 @@ describe('scan schedule', () => {
     expect(isScanDue('daily', '2026-01-09T00:30:00.000Z', now)).toBe(true); // within slack
     expect(isScanDue('weekly', '2026-01-08T00:00:00.000Z', now)).toBe(false);
     expect(isScanDue('weekly', '2026-01-02T00:00:00.000Z', now)).toBe(true);
+  });
+});
+
+describe('allowance estimate', () => {
+  it('estimates monthly checks by frequency', () => {
+    expect(estimatedMonthlyChecks(20, 'weekly')).toBe(87);
+    expect(estimatedMonthlyChecks(4, 'daily')).toBe(120);
+    expect(estimatedMonthlyChecks(50, 'off')).toBe(0);
   });
 });
 

@@ -16,28 +16,49 @@ they want to buy by real need, see what it all adds up to, and curb spontaneous 
 
 ## Free and Pro
 
-SpendWise ships as **one free app** with an optional paid upgrade, **SpendWise Pro**, added later.
+SpendWise is **one free app** with an optional subscription, **SpendWise Pro**.
 
-| Free (on the phone, costs nothing to run) | Pro (paid, needs the hosted server) |
+| Free (runs on the phone, costs you nothing) | Pro (subscription) |
 |---|---|
 | List, four categories, totals | Automatic daily/weekly price checks at major stores |
 | On-device category suggestions | Sale alerts (notifications) |
-| "Reasonable person" questions | AI category suggestions and a pointed "do you need it?" question |
-| Downgrade reminders | |
+| "Reasonable person" questions | AI category suggestions and a personal "do you need it?" question |
+| Downgrade reminders | 100 item price checks per month |
 | "Search stores for this" link per item | |
 
-How it's wired: `proActive(settings)` in `src/store.ts` turns Pro on only when the app has a server
-address **and** `settings.proUnlocked` is true. Development builds skip the payment part so Pro can be tested.
-Store builds currently ship with no server address, so they are the free version.
+### Suggested pricing
 
-### Steps to launch Pro later
-1. Host the `server/` folder online (e.g. Render, Railway, Fly.io) and put its address in `app.json` →
-   `expo.extra.apiBaseUrl`.
-2. Sell Pro as an in-app subscription. Apple and Google require their own payment systems for digital
-   features. RevenueCat (`react-native-purchases`) is the usual choice with Expo; it needs a development build.
-3. When a purchase succeeds, set `proUnlocked: true`.
-4. Make the server check the subscription on every request (e.g. RevenueCat's API), so only paying users use your AI credit.
-5. Price the subscription above your AI cost per user. Each price check is one AI web-search request.
+| | Price | You receive (after 15% store fee*) | Your AI cost per subscriber |
+|---|---|---|---|
+| Pro monthly | **$4.99 / month** | ≈ $4.24 | typical $0.50–2.50, **never more than $3.75** |
+| Pro yearly | **$39.99 / year** (2 months free) | ≈ $34 | same monthly caps |
+
+\*Apple and Google take 15% if you earn under $1M a year (you must sign up for their small-business
+programmes) and 30% otherwise. Hosting the server is a separate fixed cost (about $5–10/month).
+
+**Why a subscriber can never cost more than they pay** (`server/src/plans.ts`):
+- Price checks use Claude Haiku 5.5: about $0.02–0.04 per item check (most of it is $0.01 per web search; max 3 searches per check).
+- 100 checks per month, *and* a hidden $3.00 cap on real measured cost. Whichever comes first stops checks until the 1st of next month.
+- AI suggestions (Claude Opus 5.5, about $0.02 each) have their own $0.75 monthly cap; after that the on-device suggestion is used.
+- The same item checked in the same country within 24 hours is served from a shared cache: free, and not counted.
+- The server measures the real cost of every call from the API's usage report.
+- Items are checked in priority order (Need to have first), so the allowance goes to what matters most.
+
+### How it's wired
+- `proActive(settings)` (`src/store.ts`) turns Pro features on when a server is configured and the person has the `pro` entitlement. Development builds skip the payment check for testing.
+- `src/services/purchases.ts` handles subscriptions through RevenueCat. `src/screens/PaywallModal.tsx` is the upgrade screen, with Restore purchases (Apple requires it).
+- The server re-checks every request with RevenueCat (`server/src/entitlements.ts`), so a modified app can't get Pro for free.
+- With empty keys in `app.json`, the app is the free version and shows Pro as "coming soon".
+
+### Launch checklist for Pro
+1. **Host the server** (Render, Railway, Fly.io…) with a persistent disk for `DATA_DIR`. Set environment variables:
+   `ANTHROPIC_API_KEY`, `REVENUECAT_SECRET_KEY`, `DATA_DIR`. Optional: `PRICE_MODEL` (default `claude-haiku-5-5`) and `ASSESS_MODEL` (default `claude-opus-5-5`).
+2. **Create the subscriptions in the stores**: App Store Connect (auto-renewable subscription group "SpendWise Pro") and Google Play Console. Add monthly and yearly products with the prices above.
+3. **Set up RevenueCat** (free until $2.5K monthly revenue): add both apps, create entitlement `pro`, attach both products, and create a default offering with Monthly and Annual packages.
+4. **Fill `app.json` → `expo.extra`**: `apiBaseUrl` (hosted server), `revenueCatAppleKey`, `revenueCatGoogleKey` (public SDK keys), `termsUrl`, `privacyUrl`.
+5. **Build with EAS** (`npx eas-cli@latest build`). Real purchases don't work in Expo Go, so test with store sandbox/test accounts on a development build.
+
+To change limits or caps, edit `server/src/plans.ts`. The app reads the allowance from the server.
 
 ## Layout
 
@@ -57,11 +78,11 @@ server/                    small Node server: AI assessment + price search (hold
 cd server
 npm install
 export ANTHROPIC_API_KEY=sk-ant-...   # never put this in the app
-export APP_TOKEN=some-long-random-string   # optional shared secret
+export DEV_ALLOW_ALL=1                 # local testing only: treat everyone as Pro
 npm run dev                            # http://localhost:8787
 ```
 
-The server uses Claude (`claude-opus-5-5` by default; override with `CLAUDE_MODEL`). Price checks use
+The server uses Claude Haiku 5.5 for price checks and Claude Opus 5.5 for AI suggestions (override with `PRICE_MODEL` / `ASSESS_MODEL`). Price checks use
 Claude's web search, focused on your country, and only report offers it actually found in search results.
 
 ### 2. App
@@ -84,14 +105,11 @@ background work runs; the app also runs any due check each time it's opened.
 ```bash
 npx jest          # domain logic
 npx tsc --noEmit  # app typecheck
-cd server && npx tsc --noEmit
+cd server && npx tsc --noEmit && npm test
 ```
 
 ## Notes and limits
 
-- **Price scanning cost**: every scanned item is one AI + web-search request. Weekly scanning of a 20-item
-  list is about 80 requests a month. The server caps one scan at 25 items.
+- **Price scanning cost**: see "Suggested pricing" above. The server caps one scan at 50 items.
 - Offers in a different currency from yours are ignored for deal alerts.
 - Data is stored on the device only (AsyncStorage). There are no accounts or cloud sync yet.
-- If you set `APP_TOKEN` on the server, the app needs to send it. Adding that field to Settings is a
-  small follow-up.

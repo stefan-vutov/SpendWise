@@ -1,4 +1,5 @@
-import { client, MODEL, FALLBACK, CATEGORIES, Category, assertNotRefused } from './claude.js';
+import { client, ASSESS_MODEL, fallbackParams, CATEGORIES, Category, assertNotRefused } from './claude.js';
+import { costOfResponse } from './cost.js';
 
 export interface AssessRequest {
   name: string;
@@ -14,6 +15,8 @@ export interface AssessResponse {
   suggestedCategory: Category;
   confidence: number;
   reasoning: string;
+  /** What this call cost, in USD (server-side only; stripped before replying). */
+  costUsd: number;
   /** Only present when chosenCategory is need/must. */
   reasonablePerson?: {
     verdict: 'justified' | 'borderline' | 'not_justified';
@@ -59,9 +62,9 @@ export async function assess(req: AssessRequest): Promise<AssessResponse> {
   ].filter(Boolean);
 
   const msg = await client.beta.messages.create({
-    model: MODEL,
+    model: ASSESS_MODEL,
     max_tokens: 2000,
-    ...FALLBACK,
+    ...fallbackParams(ASSESS_MODEL),
     system: SYSTEM,
     output_config: {
       effort: 'low', // simple classification — low effort keeps it fast and cheap
@@ -69,7 +72,8 @@ export async function assess(req: AssessRequest): Promise<AssessResponse> {
     },
     messages: [{ role: 'user', content: lines.join('\n') }],
   });
-  assertNotRefused(msg);
+  const costUsd = costOfResponse(ASSESS_MODEL, msg.usage);
+  assertNotRefused(msg, costUsd);
 
   const text = msg.content.find((b) => b.type === 'text');
   if (!text || text.type !== 'text') throw new Error('No assessment returned');
@@ -86,6 +90,7 @@ export async function assess(req: AssessRequest): Promise<AssessResponse> {
     suggestedCategory: out.suggestedCategory,
     confidence: Math.max(0, Math.min(1, out.confidence)),
     reasoning: out.reasoning,
+    costUsd,
     reasonablePerson:
       protectedChoice && out.verdict !== 'not_applicable'
         ? { verdict: out.verdict, challenge: out.challenge }

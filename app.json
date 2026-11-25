@@ -37,7 +37,11 @@
       ]
     ],
     "extra": {
-      "apiBaseUrl": ""
+      "apiBaseUrl": "",
+      "revenueCatAppleKey": "",
+      "revenueCatGoogleKey": "",
+      "termsUrl": "",
+      "privacyUrl": ""
     }
   }
 }
