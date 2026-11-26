@@ -78,7 +78,7 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
         </Section>
         ) : proForSale() ? (
           <View style={st.pro}>
-            <Text style={st.proTitle}>SpendWise Pro</Text>
+            <Text style={st.proTitle}>Spendbrake Pro</Text>
             <Text style={st.hint}>
               Automatic price checks at major stores in your country, with an alert when something on your list goes on
               sale, plus AI category suggestions. Or tap any item and use “Search stores for this”.
@@ -116,7 +116,7 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
         </Section>
 
         {__DEV__ && (
-        <Section title="Developer: server address" hint="Only shown in development builds. Enter a SpendWise server address to test Pro features.">
+        <Section title="Developer: server address" hint="Only shown in development builds. Enter a Spendbrake server address to test Pro features.">
           <TextInput
             style={st.input}
             value={settings.apiBaseUrl}

@@ -6,7 +6,7 @@ import { scanPrices } from './api';
 import { isScanDue, staleItems } from '../domain/logic';
 import { CATEGORY_LABELS, Item } from '../domain/types';
 
-export const SCAN_TASK = 'spendwise-price-scan';
+export const SCAN_TASK = 'spendwise-price-scan'; // internal id, never shown to people
 const DAY = 24 * 60 * 60 * 1000;
 
 /**

@@ -1,4 +1,4 @@
-# SpendWise — purchase planner
+# Spendbrake — purchase planner
 
 A cross-platform (Android + iOS) app built with Expo / React Native that helps people sort what
 they want to buy by real need, see what it all adds up to, and curb spontaneous spending.
@@ -16,7 +16,7 @@ they want to buy by real need, see what it all adds up to, and curb spontaneous 
 
 ## Free and Pro
 
-SpendWise is **one free app** with an optional subscription, **SpendWise Pro**.
+Spendbrake is **one free app** with an optional subscription, **Spendbrake Pro**.
 
 | Free (runs on the phone, costs you nothing) | Pro (subscription) |
 |---|---|
@@ -53,7 +53,7 @@ programmes) and 30% otherwise. Hosting the server is a separate fixed cost (abou
 ### Launch checklist for Pro
 1. **Host the server** (Render, Railway, Fly.io…) with a persistent disk for `DATA_DIR`. Set environment variables:
    `ANTHROPIC_API_KEY`, `REVENUECAT_SECRET_KEY`, `DATA_DIR`. Optional: `PRICE_MODEL` (default `claude-haiku-5-5`) and `ASSESS_MODEL` (default `claude-opus-5-5`).
-2. **Create the subscriptions in the stores**: App Store Connect (auto-renewable subscription group "SpendWise Pro") and Google Play Console. Add monthly and yearly products with the prices above.
+2. **Create the subscriptions in the stores**: App Store Connect (auto-renewable subscription group "Spendbrake Pro") and Google Play Console. Add monthly and yearly products with the prices above.
 3. **Set up RevenueCat** (free until $2.5K monthly revenue): add both apps, create entitlement `pro`, attach both products, and create a default offering with Monthly and Annual packages.
 4. **Fill `app.json` → `expo.extra`**: `apiBaseUrl` (hosted server), `revenueCatAppleKey`, `revenueCatGoogleKey` (public SDK keys), `termsUrl`, `privacyUrl`.
 5. **Build with EAS** (`npx eas-cli@latest build`). Real purchases don't work in Expo Go, so test with store sandbox/test accounts on a development build.

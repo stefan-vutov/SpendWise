@@ -41,7 +41,7 @@ export function PaywallModal({ visible, onClose }: { visible: boolean; onClose: 
     try {
       const r = await buy(pkg);
       if (r === 'purchased') {
-        Alert.alert('Welcome to SpendWise Pro', 'Sale alerts are on. Set daily or weekly checks in Settings.');
+        Alert.alert('Welcome to Spendbrake Pro', 'Sale alerts are on. Set daily or weekly checks in Settings.');
         onClose();
       }
     } catch {
@@ -70,7 +70,7 @@ export function PaywallModal({ visible, onClose }: { visible: boolean; onClose: 
         <Pressable onPress={onClose} style={st.close} accessibilityLabel="Close">
           <Text style={st.closeText}>✕</Text>
         </Pressable>
-        <Text style={st.kicker}>SpendWise Pro</Text>
+        <Text style={st.kicker}>Spendbrake Pro</Text>
         <Text style={st.title}>Buy what you need — when it’s cheapest.</Text>
 
         {FEATURES.map(([icon, title, body]) => (
@@ -86,7 +86,7 @@ export function PaywallModal({ visible, onClose }: { visible: boolean; onClose: 
         {!forSale ? (
           <View style={st.soon}>
             <Text style={st.fTitle}>Coming soon</Text>
-            <Text style={st.fBody}>Everything else in SpendWise stays free.</Text>
+            <Text style={st.fBody}>Everything else in Spendbrake stays free.</Text>
           </View>
         ) : packages === null || busy ? (
           <ActivityIndicator style={{ marginVertical: 24 }} />
@@ -105,7 +105,7 @@ export function PaywallModal({ visible, onClose }: { visible: boolean; onClose: 
             <Button title="Restore purchases" kind="ghost" onPress={onRestore} />
             <Text style={st.legal}>
               Subscriptions renew automatically until cancelled. Cancel anytime in your{' '}
-              {Platform.OS === 'ios' ? 'App Store' : 'Google Play'} account settings at least 24 hours before the period ends. Everything else in SpendWise
+              {Platform.OS === 'ios' ? 'App Store' : 'Google Play'} account settings at least 24 hours before the period ends. Everything else in Spendbrake
               stays free.
             </Text>
             <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 20 }}>

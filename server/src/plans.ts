@@ -1,5 +1,5 @@
 /**
- * What a SpendWise Pro subscriber gets each calendar month (UTC).
+ * What a Spendbrake Pro subscriber gets each calendar month (UTC).
  *
  * Budget maths for the suggested $4.99/month price:
  *   $4.99 − store fee (15% for small developers, 30% otherwise) ≈ $3.49–$4.24 you receive.

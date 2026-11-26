@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "SpendWise",
-    "slug": "spendwise",
+    "name": "Spendbrake",
+    "slug": "spendbrake",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.stefanvutov.spendwise",
+      "bundleIdentifier": "com.stefanvutov.spendbrake",
       "infoPlist": {
         "UIBackgroundModes": [
           "processing",
@@ -25,7 +25,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.stefanvutov.spendwise"
+      "package": "com.stefanvutov.spendbrake"
     },
     "web": {
       "favicon": "./assets/favicon.png"

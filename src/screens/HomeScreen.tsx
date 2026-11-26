@@ -65,7 +65,7 @@ export function HomeScreen() {
   return (
     <SafeAreaView style={st.safe} edges={['top']}>
       <View style={st.header}>
-        <Text style={st.appTitle}>SpendWise</Text>
+        <Text style={st.appTitle}>Spendbrake</Text>
         <Pressable onPress={() => setSettingsOpen(true)} accessibilityLabel="Settings" hitSlop={12}>
           <Text style={st.gear}>⚙︎</Text>
         </Pressable>

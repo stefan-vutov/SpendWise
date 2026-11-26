@@ -126,6 +126,7 @@ export const useStore = create<State>()(
       updateSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
     }),
     {
+      // Storage key kept from the app's working title so existing lists survive the rename.
       name: 'spendwise-v1',
       storage: createJSONStorage(() => AsyncStorage),
       version: 2,
@@ -142,7 +143,7 @@ export const useStore = create<State>()(
 );
 
 /**
- * SpendWise Pro = AI suggestions + automatic price checks. Both cost money per use, so they need
+ * Spendbrake Pro = AI suggestions + automatic price checks. Both cost money per use, so they need
  * the hosted server AND a paid unlock. Free users get everything else, fully on-device.
  * Development builds skip the payment check so the paid features can be tested.
  */

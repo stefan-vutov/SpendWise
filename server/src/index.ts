@@ -38,7 +38,7 @@ const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) && v >=
 async function requirePro(req: http.IncomingMessage): Promise<string> {
   const userId = str(req.headers['x-user-id'], 128);
   if (!userId) throw new HttpError(401, 'Missing user id');
-  if (!(await hasPro(userId))) throw new HttpError(402, 'SpendWise Pro subscription required', 'subscription_required');
+  if (!(await hasPro(userId))) throw new HttpError(402, 'Spendbrake Pro subscription required', 'subscription_required');
   return userId;
 }
 
@@ -141,4 +141,4 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => console.log(`SpendWise server on http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`Spendbrake server on http://localhost:${PORT}`));

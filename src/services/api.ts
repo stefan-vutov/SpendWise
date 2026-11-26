@@ -14,7 +14,7 @@ export class ApiError extends Error {
 }
 
 async function request<T>(settings: Settings, method: 'GET' | 'POST', path: string, body: unknown, timeoutMs: number): Promise<T> {
-  if (!proActive(settings)) throw new Error('SpendWise Pro not active (free mode)');
+  if (!proActive(settings)) throw new Error('Spendbrake Pro not active (free mode)');
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {

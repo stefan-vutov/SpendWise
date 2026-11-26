@@ -101,11 +101,11 @@ export interface Settings {
   scanFrequency: ScanFrequency;
   includeInternational: boolean;
   staleThreshold: StaleThreshold;
-  /** Base URL of the SpendWise server (AI assessment + price scanning). */
+  /** Base URL of the Spendbrake server (AI assessment + price scanning). */
   apiBaseUrl: string;
   lastScanAt?: string;
   lastStaleNotifyAt?: string;
-  /** Set by the in-app purchase flow once SpendWise Pro is sold (not yet). */
+  /** Set by the in-app purchase flow once Spendbrake Pro is sold (not yet). */
   proUnlocked?: boolean;
   /** Store page where the person can cancel or change their subscription. */
   manageSubscriptionUrl?: string;

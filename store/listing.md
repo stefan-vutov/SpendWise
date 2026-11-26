@@ -1,4 +1,4 @@
-# SpendWise: store listing text
+# Spendbrake: store listing text
 
 Copy these into Google Play Console and App Store Connect.
 
@@ -6,18 +6,18 @@ Copy these into Google Play Console and App Store Connect.
 
 | Field | Limit | Text |
 |---|---|---|
-| App name (Apple) | 30 | SpendWise: Purchase Planner |
-| App name (Google) | 30 | SpendWise: Purchase Planner |
+| App name (Apple) | 30 | Spendbrake: Stop Impulse Buys |
+| App name (Google) | 30 | Spendbrake: Stop Impulse Buys |
 | Subtitle (Apple) | 30 | Needs vs wants, before you buy |
 | Short description (Google) | 80 | Plan purchases, sort needs from wants, and stop impulse spending. |
 
-If "SpendWise" is already taken on the App Store, try "SpendWise Planner" or "Spend Wise: Needs & Wants".
+Alternative title if you prefer: "Spendbrake: Purchase Planner".
 
 ## Full description (both stores)
 
-SpendWise helps you think before you buy.
+Spendbrake helps you think before you buy.
 
-Add the things you're planning to buy, and SpendWise helps you sort them into four simple categories:
+Add the things you're planning to buy, and Spendbrake helps you sort them into four simple categories:
 • Need to have: essential right now
 • Must have: needed soon
 • Good to have: useful, but it can wait
@@ -27,8 +27,8 @@ See exactly what each category adds up to, and what everything adds up to in tot
 
 STOP IMPULSE SPENDING
 • Smart category suggestions as you type.
-• When you put something in "Need to have" or "Must have", SpendWise asks a few quick questions: would a reasonable person really need this?
-• If a "need" sits on your list for weeks without being bought, SpendWise asks whether it should move down a category. You choose how long: 1 week, 2 weeks, or 1 to 6 months.
+• When you put something in "Need to have" or "Must have", Spendbrake asks a few quick questions: would a reasonable person really need this?
+• If a "need" sits on your list for weeks without being bought, Spendbrake asks whether it should move down a category. You choose how long: 1 week, 2 weeks, or 1 to 6 months.
 
 COMPARE PRICES
 • Tap any item to search stores for the best price.
@@ -37,7 +37,7 @@ PRIVATE BY DESIGN
 • Your list stays on your phone. No account, no ads, no tracking.
 
 <!-- Add this section only once Pro is live (Apple rejects listings that advertise unavailable features):
-SPENDWISE PRO
+SPENDBRAKE PRO
 Automatic daily or weekly price checks at major stores in your country, with an alert when something on your list
 goes on sale. Monthly or yearly subscription; everything else stays free.
 -->

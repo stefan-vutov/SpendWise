@@ -1,7 +1,7 @@
 import { PRO_PLAN } from './plans.js';
 
 /**
- * Checks with RevenueCat whether a user currently has SpendWise Pro.
+ * Checks with RevenueCat whether a user currently has Spendbrake Pro.
  * Needs REVENUECAT_SECRET_KEY (a *secret* API key from the RevenueCat dashboard, never the
  * public key used in the app). For local testing without RevenueCat, set DEV_ALLOW_ALL=1.
  */
