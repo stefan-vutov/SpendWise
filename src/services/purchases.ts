@@ -6,7 +6,7 @@ import { useStore } from '../store';
 /**
  * SpendWise Pro subscriptions via RevenueCat, which wraps Apple's and Google's billing.
  * Public SDK keys go in app.json → expo.extra (they're safe to ship in the app).
- * With no key set, the app runs as the free version and shows Pro as "coming soon".
+ * With no key set, the app runs as the free version and Pro stays hidden.
  */
 const extra = (Constants.expoConfig?.extra ?? {}) as {
   revenueCatAppleKey?: string;

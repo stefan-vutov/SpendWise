@@ -7,24 +7,25 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.spendwise.app",
+      "supportsTablet": false,
+      "bundleIdentifier": "com.stefanvutov.spendwise",
       "infoPlist": {
         "UIBackgroundModes": [
           "processing",
           "fetch"
-        ]
+        ],
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#4F46E5",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.spendwise.app"
+      "package": "com.stefanvutov.spendwise"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -34,14 +35,22 @@
       [
         "expo-notifications",
         {}
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "backgroundColor": "#ffffff"
+        }
       ]
     ],
     "extra": {
       "apiBaseUrl": "",
       "revenueCatAppleKey": "",
       "revenueCatGoogleKey": "",
-      "termsUrl": "",
-      "privacyUrl": ""
+      "termsUrl": "https://stefan-vutov.github.io/SpendWise/terms.html",
+      "privacyUrl": "https://stefan-vutov.github.io/SpendWise/privacy.html"
     }
   }
 }

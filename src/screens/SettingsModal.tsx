@@ -76,16 +76,16 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
             <Text style={st.hint}>Last scan: {new Date(settings.lastScanAt).toLocaleString()}</Text>
           )}
         </Section>
-        ) : (
+        ) : proForSale() ? (
           <View style={st.pro}>
-            <Text style={st.proTitle}>SpendWise Pro{proForSale() ? '' : ' · coming soon'}</Text>
+            <Text style={st.proTitle}>SpendWise Pro</Text>
             <Text style={st.hint}>
               Automatic price checks at major stores in your country, with an alert when something on your list goes on
-              sale, plus AI category suggestions. Meanwhile, tap any item and use “Search stores for this”.
+              sale, plus AI category suggestions. Or tap any item and use “Search stores for this”.
             </Text>
-            {proForSale() && <Button title="See Pro" onPress={() => setPaywall(true)} />}
+            <Button title="See Pro" onPress={() => setPaywall(true)} />
           </View>
-        )}
+        ) : null}
 
         {pro && (
           <Section title="Your Pro plan">
